@@ -87,7 +87,7 @@ def get_info(lat, lon):
 {num}  \n{now}  \n{cloudiness}  \n{temp_F:.01f}F ({temp_C:.01f}C)
 Wind: {wind_speed}, {wind_dir}   \nChance of Rain: {precip}%
 Dewpoint: {dewpoint_F:.1f}F ({dewpoint_C:.1f}C)  \nRel Humidity: {rel_hum}%  \nVisibility: {vis}'''
-    st.code(print_out, language='python')
+    st.code(print_out, language='None')
 
 
 def get_filename(filename):
