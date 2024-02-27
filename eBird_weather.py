@@ -1,5 +1,4 @@
 import streamlit as st
-import urllib.request
 import os
 import json
 import re
@@ -92,7 +91,7 @@ Dewpoint: {dewpoint_F:.1f}F ({dewpoint_C:.1f}C)  \nRel Humidity: {rel_hum}%  \nV
 
 def get_filename(filename):
     file_dir = os.path.dirname(__file__)
-    return os.path.join(file_dir, filename)
+    return os.path.join(file_dir, 'resources', filename)
 
 
 def load_csv(filename):
@@ -108,7 +107,7 @@ def state_dropdown_options():
 
 @st.cache_data
 def load_eBird_hotspots(state):
-    with open(f'{state}_hotspots.json', encoding="utf-8") as f:
+    with open(f'resources/{state}_hotspots.json', encoding="utf-8") as f:
         eBird_hotspots = json.load(f)
     return eBird_hotspots
 
