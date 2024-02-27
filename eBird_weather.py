@@ -139,7 +139,7 @@ def main():
         if st.session_state.filter_hotspot:
             lat_input = eBird_location_value('lat', hotspot_data)
             lon_input = eBird_location_value('lng', hotspot_data)
-            st.write(lat_input, lon_input)
+            # st.write(lat_input, lon_input)
             get_info(lat_input, lon_input)
 
 
