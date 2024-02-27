@@ -56,9 +56,10 @@ def get_info(lat, lon):
     clean_time = re.sub(r"-[0-9][0-9]:00", '', clean_str)
     date_start = datetime.strptime(clean_time, '%Y-%m-%d %H:%M:%S')
     now = datetime.now()
+    now = now.replace(hour=date_start.hour)
     rounded_value = now.replace(second=0, microsecond=0, minute=0,
                                 hour=date_start.hour) + timedelta(hours=now.minute//30)
-    now = now.strftime('%Y-%m-%d %H:%M:%S')
+    now = now.strftime('%H:%M:%S')
     if date_start <= rounded_value:
         i = 0
     else:
@@ -83,7 +84,7 @@ def get_info(lat, lon):
     else:
         vis = "10.0 mi"
     print_out = f'''
-{num}  \n{now}  \n{date_start}  \n{rounded_value}  \n{cloudiness}  \n{temp_F:.01f}F ({temp_C:.01f}C)
+{num}  \n{now}  \n{cloudiness}  \n{temp_F:.01f}F ({temp_C:.01f}C)
 Wind: {wind_speed}, {wind_dir}   \nChance of Rain: {precip}%
 Dewpoint: {dewpoint_F:.1f}F ({dewpoint_C:.1f}C)  \nRel Humidity: {rel_hum}%  \nVisibility: {vis}'''
     st.code(print_out, language='python')
@@ -123,8 +124,7 @@ def eBird_location_value(col, hotspots):
 
 
 def main():
-    st.title("Weather")
-    st.subheader("GPS input")
+    st.title("eBird Weather")
     # gps = html(my_js)
     # st.write(gps)
 
