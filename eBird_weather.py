@@ -60,7 +60,7 @@ def get_info(lat, lon):
     rounded_value = now.replace(second=0, microsecond=0, minute=0,
                                 hour=date_start.hour) + timedelta(hours=now.minute//30)
     now = now.strftime('%H:%M:%S')
-    if date_start <= rounded_value:
+    if rounded_value == date_start:
         i = 0
     else:
         i = 1
@@ -84,7 +84,7 @@ def get_info(lat, lon):
     else:
         vis = "10.0 mi"
     print_out = f'''
-{num}  \n{now}  \n{cloudiness}  \n{temp_F:.01f}F ({temp_C:.01f}C)
+{now}  \n{cloudiness}  \n{temp_F:.01f}F ({temp_C:.01f}C)
 Wind: {wind_speed}, {wind_dir}   \nChance of Rain: {precip}%
 Dewpoint: {dewpoint_F:.1f}F ({dewpoint_C:.1f}C)  \nRel Humidity: {rel_hum}%  \nVisibility: {vis}'''
     st.code(print_out, language='None')
