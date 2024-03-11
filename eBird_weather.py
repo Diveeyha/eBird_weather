@@ -6,6 +6,15 @@ import requests
 import pandas as pd
 import time
 from datetime import datetime, timedelta
+from dateutil import tz
+from timezonefinder import TimezoneFinder
+
+
+def get_timezone(lat, lng):
+    tf = TimezoneFinder()
+    tz = tf.timezone_at(lat=lat, lng=lng)
+    return tz
+
 # from streamlit.components.v1 import html
 #
 #
@@ -43,51 +52,59 @@ from datetime import datetime, timedelta
 # """
 
 
+@st.cache_data(ttl=60*60)
+def get_merry_sky(lat, lon):
+    m_weather = requests.get(f"https://api.merrysky.net/weather?q={lat},{lon}&source=pirateweather")
+    m_json = m_weather.json()
+    merry_sky_hourly = m_json.get("hourly").get("data")
+    return merry_sky_hourly
+
+
 def get_info(lat, lon):
-    resp = requests.get(f"https://api.weather.gov/points/{lat},{lon}")
-    first_page = resp.json()
-    first_link = first_page.get("properties").get("forecastHourly")
-
-    resp2 = requests.get(first_link)
-    second_page = resp2.json()
-    get_hourly = second_page.get("properties").get("periods")
-    start_time = get_hourly[0]["startTime"]
-    clean_str = start_time.replace('T', ' ')
-    clean_time = re.sub(r"-[0-9][0-9]:00", '', clean_str)
-    date_start = datetime.strptime(clean_time, '%Y-%m-%d %H:%M:%S')
     now = datetime.now()
-    now = now.replace(hour=date_start.hour)
-    rounded_value = now.replace(second=0, microsecond=0, minute=0,
-                                hour=date_start.hour) + timedelta(hours=now.minute//30)
-    now = now.strftime('%H:%M:%S')
-    if rounded_value == date_start:
-        i = 0
-    else:
-        i = 1
+    rounded_value = now.replace(second=0, microsecond=0, minute=0, hour=now.hour)
+    m_hourly = get_merry_sky(lat, lon)
+    adj_now = rounded_value.timestamp()
+    # time = datetime.fromtimestamp(adj_now).strftime('%Y-%m-%d %H:%M:%S')
+    time = datetime.fromtimestamp(adj_now)
+    for i in m_hourly:
+        if i["time"] == adj_now:
+            temp_C = i["temperature"]
+            temp_F = (temp_C * 9/5) + 32
+            feels_likeC = i["apparentTemperature"]
+            feels_likeF = (feels_likeC * 9 / 5) + 32
+            precip = i["precipProbability"] * 100
+            dewpoint_C = i["dewPoint"]
+            dewpoint_F = (dewpoint_C * 1.8) + 32
+            rel_hum = i["humidity"] * 100
+            wind_speed = i["windSpeed"] * 2.23694
+            wind_gust = i["windGust"] * 2.23694
+            windBearing = i["windBearing"]
+            wind_dir = degToCompass(windBearing)
+            cloudiness = i["summary"]
+            cloud_cover = i["cloudCover"] * 100
+            vis = i["visibility"] * 0.621371
+            precip_amount = round(i["precipAccumulation"]/25.4, 1)
+            precip_type = i["precipType"]
 
-    num = get_hourly[i]["number"]
-    temp_F = get_hourly[i]["temperature"]
-    temp_C = (temp_F - 32) * 5/9
-    precip = get_hourly[i]["probabilityOfPrecipitation"]["value"]
-    dewpoint_C = get_hourly[i]["dewpoint"]["value"]
-    dewpoint_F = (dewpoint_C * 1.8) + 32
-    rel_hum = get_hourly[i]["relativeHumidity"]["value"]
-    wind_speed = get_hourly[i]["windSpeed"]
-    wind_dir = get_hourly[i]["windDirection"]
-    cloudiness = get_hourly[i]["shortForecast"]
-    if cloudiness == "fog":
-        vis = "< 3,300 ft (1 km)"
-    elif cloudiness == "mist":
-        vis = "0.62 - 1.2 mi (1 - 2 km)"
-    elif cloudiness == "haze":
-        vis = "1.2 - 3.1 mi (2 - 5 km)"
-    else:
-        vis = "10.0 mi"
-    print_out = f'''
-{now}  \n{cloudiness}  \n{temp_F:.01f}F ({temp_C:.01f}C)
-Wind: {wind_speed}, {wind_dir}   \nChance of Rain: {precip}%
-Dewpoint: {dewpoint_F:.1f}F ({dewpoint_C:.1f}C)  \nRel Humidity: {rel_hum}%  \nVisibility: {vis}'''
-    st.code(print_out, language='None')
+    print_out2 = f'''
+{cloudiness}, {temp_F:.1f}F/{temp_C:.1f}C
+Feel: {feels_likeF:.1f}F/{feels_likeC:.1f}C 
+Wind: {wind_dir}, {wind_speed:.1f} - {wind_gust:.1f}mph
+Clouds: {cloud_cover}%
+Precip: {precip:.1f}%{'' if precip_amount < 0.1 else f", {precip_amount}in of {precip_type}"}
+Rel Humidity: {rel_hum:.1f}%
+Dewpoint: {dewpoint_F:.1f}F ({dewpoint_C:.1f}C)
+Visibility: {vis:.01f}mi
+Last update: {time.astimezone(tz.gettz(get_timezone(lat, lon))).strftime('%Y-%m-%d %H:%M:%S')}'''
+
+    st.code(print_out2, language='None')
+
+
+def degToCompass(num):
+    val = int((num/22.5)+.5)
+    arr = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
+    return arr[(val % 16)]
 
 
 def get_filename(filename):
@@ -118,33 +135,40 @@ def eBird_hotspots_options(col, hotspots):
     return loc_name
 
 
-def eBird_location_value(col, hotspots):
-    col_value = [d.get(col) for d in hotspots if d.get('locName') == st.session_state.filter_hotspot]
+def location_value(col, hotspots, x, y):
+    col_value = [d.get(col) for d in hotspots if d.get(x) == y]
     return col_value[0]
+
+
+def eBird_hotspot_dropdown(data):
+    st.selectbox("Ebird Hotspot:", eBird_hotspots_options('locName', data), index=None,
+                 key="filter_hotspot")  # use to reference locName from hotspots
+    if st.session_state.filter_hotspot:
+        lat_input = location_value('lat', data, 'locName', st.session_state.filter_hotspot)
+        lon_input = location_value('lng', data, 'locName', st.session_state.filter_hotspot)
+        st.write(lat_input, lon_input)
+        get_info(lat_input, lon_input)
 
 
 def main():
     st.title("eBird Weather")
     # gps = html(my_js)
     # st.write(gps)
+    col1, col2 = st.columns([1, 1.5])
+    col1.radio("State", ["VA", "NY", "Other State"], horizontal=True, label_visibility="collapsed", key="radio_state")
+    if st.session_state.radio_state == "Other State":
+        col2.selectbox("State:", state_dropdown_options(), index=None, label_visibility="collapsed", key="filter_state")
+        if st.session_state.filter_state:
+            hotspot_data = load_eBird_hotspots(st.session_state.filter_state)
+            eBird_hotspot_dropdown(hotspot_data)
+    if st.session_state.radio_state != "Other State":
+        hotspot_data = load_eBird_hotspots(st.session_state.radio_state)
+        eBird_hotspot_dropdown(hotspot_data)
 
-    st.selectbox("State:", state_dropdown_options(), index=None, key="filter_state")
-    if st.session_state.filter_state:
-        hotspot_data = load_eBird_hotspots(st.session_state.filter_state)
         # start = time.time()
-        st.selectbox("Ebird Hotspot:", eBird_hotspots_options('locName', hotspot_data), index=None,
-                 key="filter_hotspot")  # use to reference locName from hotspots
         # st.write('First! Time', int((time.time() - start) * 10) / 10.0, 'SECONDS')
-
-        if st.session_state.filter_hotspot:
-            lat_input = eBird_location_value('lat', hotspot_data)
-            lon_input = eBird_location_value('lng', hotspot_data)
-            # st.write(lat_input, lon_input)
-            get_info(lat_input, lon_input)
-
 
 # Run main
 if __name__ == "__main__":
-    st.set_page_config(page_icon='🐦', initial_sidebar_state='expanded')
-
+    st.set_page_config(page_icon='💦', initial_sidebar_state='expanded')
     main()
