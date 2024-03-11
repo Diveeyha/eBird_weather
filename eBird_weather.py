@@ -146,7 +146,7 @@ def eBird_hotspot_dropdown(data):
     if st.session_state.filter_hotspot:
         lat_input = location_value('lat', data, 'locName', st.session_state.filter_hotspot)
         lon_input = location_value('lng', data, 'locName', st.session_state.filter_hotspot)
-        st.write(lat_input, lon_input)
+        # st.write(lat_input, lon_input)
         get_info(lat_input, lon_input)
 
 
