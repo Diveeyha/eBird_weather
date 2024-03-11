@@ -170,5 +170,5 @@ def main():
 
 # Run main
 if __name__ == "__main__":
-    st.set_page_config(page_icon='💦', initial_sidebar_state='expanded')
+    st.set_page_config(page_icon='💨', initial_sidebar_state='expanded')
     main()
