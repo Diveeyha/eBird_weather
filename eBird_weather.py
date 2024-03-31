@@ -52,7 +52,7 @@ def get_timezone(lat, lng):
 # """
 
 
-@st.cache_data(ttl=60*60)
+@st.cache_data(ttl=60*60*12)
 def get_merry_sky(lat, lon):
     m_weather = requests.get(f"https://api.merrysky.net/weather?q={lat},{lon}&source=pirateweather")
     m_json = m_weather.json()
@@ -154,6 +154,11 @@ def main():
     st.title("eBird Weather")
     # gps = html(my_js)
     # st.write(gps)
+    co1, co2 = st.columns([1, 1.5])
+    co1.radio("Time", ["Current", "Other Time"], horizontal=True, label_visibility="collapsed",
+               key="radio_time")
+    if st.session_state.radio_time == "Other Time":
+        co2.time_input('Input time', datetime.now(), label_visibility="collapsed")
     col1, col2 = st.columns([1, 1.5])
     col1.radio("State", ["VA", "NY", "Other State"], horizontal=True, label_visibility="collapsed", key="radio_state")
     if st.session_state.radio_state == "Other State":
