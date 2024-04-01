@@ -4,8 +4,8 @@ import json
 import re
 import requests
 import pandas as pd
-import time
-from datetime import datetime, timedelta
+
+from datetime import datetime
 from dateutil import tz
 from timezonefinder import TimezoneFinder
 
@@ -60,9 +60,9 @@ def get_merry_sky(lat, lon):
     return merry_sky_hourly
 
 
-def get_info(lat, lon):
+def get_info(hour_w, lat, lon):
     now = datetime.now()
-    rounded_value = now.replace(second=0, microsecond=0, minute=0, hour=now.hour)
+    rounded_value = now.replace(second=0, microsecond=0, minute=0, hour=hour_w)
     m_hourly = get_merry_sky(lat, lon)
     adj_now = rounded_value.timestamp()
     # time = datetime.fromtimestamp(adj_now).strftime('%Y-%m-%d %H:%M:%S')
@@ -140,14 +140,14 @@ def location_value(col, hotspots, x, y):
     return col_value[0]
 
 
-def eBird_hotspot_dropdown(data):
+def eBird_hotspot_dropdown(data, weather_time):
     st.selectbox("Ebird Hotspot:", eBird_hotspots_options('locName', data), index=None,
                  key="filter_hotspot")  # use to reference locName from hotspots
     if st.session_state.filter_hotspot:
         lat_input = location_value('lat', data, 'locName', st.session_state.filter_hotspot)
         lon_input = location_value('lng', data, 'locName', st.session_state.filter_hotspot)
         # st.write(lat_input, lon_input)
-        get_info(lat_input, lon_input)
+        get_info(weather_time, lat_input, lon_input)
 
 
 def main():
@@ -155,23 +155,25 @@ def main():
     # gps = html(my_js)
     # st.write(gps)
     co1, co2 = st.columns([1, 1.5])
-    co1.radio("Time", ["Current", "Other Time"], horizontal=True, label_visibility="collapsed",
-               key="radio_time")
+    co1.radio("Time", ["Current", "Other Time"], horizontal=True, label_visibility="collapsed", key="radio_time")
+    weather_time = datetime.now()
     if st.session_state.radio_time == "Other Time":
-        co2.time_input('Input time', datetime.now(), label_visibility="collapsed")
+        weather_time = co2.time_input('Input time', datetime.now(), label_visibility="collapsed")
+
     col1, col2 = st.columns([1, 1.5])
     col1.radio("State", ["VA", "NY", "Other State"], horizontal=True, label_visibility="collapsed", key="radio_state")
     if st.session_state.radio_state == "Other State":
         col2.selectbox("State:", state_dropdown_options(), index=None, label_visibility="collapsed", key="filter_state")
         if st.session_state.filter_state:
             hotspot_data = load_eBird_hotspots(st.session_state.filter_state)
-            eBird_hotspot_dropdown(hotspot_data)
+            eBird_hotspot_dropdown(hotspot_data, weather_time.hour)
     if st.session_state.radio_state != "Other State":
         hotspot_data = load_eBird_hotspots(st.session_state.radio_state)
-        eBird_hotspot_dropdown(hotspot_data)
+        eBird_hotspot_dropdown(hotspot_data, weather_time.hour)
 
         # start = time.time()
         # st.write('First! Time', int((time.time() - start) * 10) / 10.0, 'SECONDS')
+
 
 # Run main
 if __name__ == "__main__":
