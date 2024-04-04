@@ -177,7 +177,7 @@ def main():
               key="radio_time")
     st.write(time.time())
     st.write(datetime.now())
-    st.write(datetime.now() - datetime.now(zoneinfo.ZoneInfo(time_zone)).utcoffset())
+    st.write(datetime.now(zoneinfo.ZoneInfo(time_zone)).utcoffset() - datetime.now())
     # st.write(datetime.timestamp(time.time()))
     # st.write(time.astimezone(tz.gettz(get_timezone(lat, lon))).strftime('%Y-%m-%d %H:%M:%S'))
     if st.session_state.radio_time == "Other Time":
