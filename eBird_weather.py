@@ -65,9 +65,9 @@ def get_merry_sky(lat, lon):
 
 def get_info(hour_w, lat, lon, utc_offset):
     now = datetime.now()
-    rounded_value = now.replace(second=0, microsecond=0, minute=0, hour=hour_w)
+    rounded_value = now.replace(second=0, microsecond=0, minute=0, hour=hour_w) + timedelta(hours=utc_offset)
     m_hourly = get_merry_sky(lat, lon)
-    adj_now = rounded_value.timestamp() + timedelta(hours=utc_offset)
+    adj_now = rounded_value.timestamp()
     # time = datetime.fromtimestamp(adj_now).strftime('%Y-%m-%d %H:%M:%S')
     time = datetime.fromtimestamp(adj_now)
     for i in m_hourly:
