@@ -63,7 +63,7 @@ def get_merry_sky(lat, lon):
     return merry_sky_hourly
 
 
-def get_info(hour_w, lat, lon):
+def get_info(hour_w, lat, lon, utc_offset):
     now = datetime.now()
     rounded_value = now.replace(second=0, microsecond=0, minute=0, hour=hour_w)
     m_hourly = get_merry_sky(lat, lon)
@@ -143,7 +143,7 @@ def location_value(col, hotspots, x, y):
     return col_value[0]
 
 
-def eBird_hotspot_dropdown(data, weather_time):
+def eBird_hotspot_dropdown(data, weather_time, utc_offset):
     st.selectbox("Ebird Hotspot:", eBird_hotspots_options('locName', data), index=None,
              key="filter_hotspot")  # use to reference locName from hotspots
     if st.session_state.filter_hotspot:
@@ -151,7 +151,7 @@ def eBird_hotspot_dropdown(data, weather_time):
         lon_input = location_value('lng', data, 'locName', st.session_state.filter_hotspot)
         # st.write(lat_input, lon_input)
 
-        get_info(weather_time.hour, lat_input, lon_input)
+        get_info(weather_time.hour, lat_input, lon_input, utc_offset)
 
 
 def main():
@@ -175,30 +175,19 @@ def main():
     time_col1, time_col2 = st.columns([1, 1.5])
     time_col1.radio("Time", ["Current", "Other Time"], horizontal=True, label_visibility="collapsed",
               key="radio_time")
-    st.write(time.time())
+    utc_offset = 24 - (datetime.now(zoneinfo.ZoneInfo(time_zone)).utcoffset().seconds/3600)
+    st.write(utc_offset)
     st.write(datetime.now())
     st.write(datetime.now(zoneinfo.ZoneInfo(time_zone)))
     # st.write(datetime.timestamp(time.time()))
     # st.write(time.astimezone(tz.gettz(get_timezone(lat, lon))).strftime('%Y-%m-%d %H:%M:%S'))
     if st.session_state.radio_time == "Other Time":
-        weather_time = time_col2.time_input('Input time', datetime.now(), label_visibility="collapsed", step=3600)
+        weather_time = time_col2.time_input('Input time', datetime.now(zoneinfo.ZoneInfo(time_zone)), label_visibility="collapsed", step=3600)
 
+    eBird_hotspot_dropdown(hotspot_data, weather_time, utc_offset)
 
-    eBird_hotspot_dropdown(hotspot_data, weather_time)
-
-
-
-
-
-
-
-
-
-
-
-
-        # start = time.time()
-        # st.write('First! Time', int((time.time() - start) * 10) / 10.0, 'SECONDS')
+    # start = time.time()
+    # st.write('First! Time', int((time.time() - start) * 10) / 10.0, 'SECONDS')
 
 
 # Run main
