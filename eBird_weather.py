@@ -4,8 +4,11 @@ import json
 import re
 import requests
 import pandas as pd
-
-from datetime import datetime
+import us
+import zoneinfo
+import time
+# import datetime
+from datetime import datetime, timedelta
 from dateutil import tz
 from timezonefinder import TimezoneFinder
 
@@ -142,34 +145,57 @@ def location_value(col, hotspots, x, y):
 
 def eBird_hotspot_dropdown(data, weather_time):
     st.selectbox("Ebird Hotspot:", eBird_hotspots_options('locName', data), index=None,
-                 key="filter_hotspot")  # use to reference locName from hotspots
+             key="filter_hotspot")  # use to reference locName from hotspots
     if st.session_state.filter_hotspot:
         lat_input = location_value('lat', data, 'locName', st.session_state.filter_hotspot)
         lon_input = location_value('lng', data, 'locName', st.session_state.filter_hotspot)
         # st.write(lat_input, lon_input)
-        get_info(weather_time, lat_input, lon_input)
+
+        get_info(weather_time.hour, lat_input, lon_input)
 
 
 def main():
     st.title("eBird Weather")
-    # gps = html(my_js)
-    # st.write(gps)
-    co1, co2 = st.columns([1, 1.5])
-    co1.radio("Time", ["Current", "Other Time"], horizontal=True, label_visibility="collapsed", key="radio_time")
-    weather_time = datetime.now()
-    if st.session_state.radio_time == "Other Time":
-        weather_time = co2.time_input('Input time', datetime.now(), label_visibility="collapsed")
+    weather_time = datetime.today()
 
-    col1, col2 = st.columns([1, 1.5])
-    col1.radio("State", ["VA", "NY", "Other State"], horizontal=True, label_visibility="collapsed", key="radio_state")
-    if st.session_state.radio_state == "Other State":
-        col2.selectbox("State:", state_dropdown_options(), index=None, label_visibility="collapsed", key="filter_state")
-        if st.session_state.filter_state:
-            hotspot_data = load_eBird_hotspots(st.session_state.filter_state)
-            eBird_hotspot_dropdown(hotspot_data, weather_time.hour)
+    state_col1, state_col2 = st.columns([1, 1.5])
+    state_col1.radio("State", ["VA", "NY", "Other State"], horizontal=True, label_visibility="collapsed", key="radio_state")
     if st.session_state.radio_state != "Other State":
         hotspot_data = load_eBird_hotspots(st.session_state.radio_state)
-        eBird_hotspot_dropdown(hotspot_data, weather_time.hour)
+        time_zone = 'America/New_York'
+        st.write(time_zone)
+
+    if st.session_state.radio_state == "Other State":
+        state_col2.selectbox("State:", state_dropdown_options(), index=None, label_visibility="collapsed", key="filter_state")
+        if st.session_state.filter_state:
+            hotspot_data = load_eBird_hotspots(st.session_state.filter_state)
+            time_zone = us.states.lookup(st.session_state.filter_state).capital_tz
+            st.write(time_zone)
+
+    time_col1, time_col2 = st.columns([1, 1.5])
+    time_col1.radio("Time", ["Current", "Other Time"], horizontal=True, label_visibility="collapsed",
+              key="radio_time")
+    st.write(time.time())
+    st.write(datetime.now())
+    st.write(datetime.now() - datetime.now(zoneinfo.ZoneInfo(time_zone)).utcoffset())
+    # st.write(datetime.timestamp(time.time()))
+    # st.write(time.astimezone(tz.gettz(get_timezone(lat, lon))).strftime('%Y-%m-%d %H:%M:%S'))
+    if st.session_state.radio_time == "Other Time":
+        weather_time = time_col2.time_input('Input time', datetime.now(), label_visibility="collapsed", step=3600)
+
+
+    eBird_hotspot_dropdown(hotspot_data, weather_time)
+
+
+
+
+
+
+
+
+
+
+
 
         # start = time.time()
         # st.write('First! Time', int((time.time() - start) * 10) / 10.0, 'SECONDS')
@@ -179,3 +205,5 @@ def main():
 if __name__ == "__main__":
     st.set_page_config(page_icon='💨', initial_sidebar_state='expanded')
     main()
+
+37.092726, -76.273583
