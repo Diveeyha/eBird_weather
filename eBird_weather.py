@@ -165,22 +165,22 @@ def main():
     if st.session_state.radio_state != "Other State":
         hotspot_data = load_eBird_hotspots(st.session_state.radio_state)
         time_zone = 'America/New_York'
-        st.write(time_zone)
+        # st.write(time_zone)
 
     if st.session_state.radio_state == "Other State":
         state_col2.selectbox("State:", state_dropdown_options(), index=None, label_visibility="collapsed", key="filter_state")
         if st.session_state.filter_state:
             hotspot_data = load_eBird_hotspots(st.session_state.filter_state)
             time_zone = us.states.lookup(st.session_state.filter_state).capital_tz
-            st.write(time_zone)
+            # st.write(time_zone)
 
     time_col1, time_col2 = st.columns([1, 1.5])
     time_col1.radio("Time", ["Current", "Other Time"], horizontal=True, label_visibility="collapsed",
               key="radio_time")
     utc_offset = 24 - (datetime.now(zoneinfo.ZoneInfo(time_zone)).utcoffset().seconds/3600)
-    st.write(utc_offset)
-    st.write(datetime.now())
-    st.write(datetime.now(zoneinfo.ZoneInfo(time_zone)))
+    # st.write(utc_offset)
+    # st.write(datetime.now())
+    # st.write(datetime.now(zoneinfo.ZoneInfo(time_zone)))
     # st.write(datetime.timestamp(time.time()))
     # st.write(time.astimezone(tz.gettz(get_timezone(lat, lon))).strftime('%Y-%m-%d %H:%M:%S'))
     if st.session_state.radio_time == "Other Time":
@@ -196,5 +196,3 @@ def main():
 if __name__ == "__main__":
     st.set_page_config(page_icon='💨', initial_sidebar_state='expanded')
     main()
-
-37.092726, -76.273583
