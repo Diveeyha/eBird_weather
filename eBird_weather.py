@@ -181,7 +181,7 @@ def main():
             st.stop()
             # st.write(time_zone)
 
-    time_col1, time_col2 = st.columns([0.5, 0.5])
+    time_col1, time_col2 = st.columns([5, 1])
     time_col1.radio("Time", ["Current", "Other Time"], horizontal=True, label_visibility="collapsed",
               key="radio_time")
     utc_offset = 24 - (datetime.now(zoneinfo.ZoneInfo(time_zone)).utcoffset().seconds/3600)
@@ -232,9 +232,9 @@ if __name__ == "__main__":
                         justify-content: center;
                     }
                     [data-testid="column"] {
-                        width: calc(33.3333% - 1rem) !important;
-                        flex: 1 1 calc(33.3333% - 1rem) !important;
-                        min-width: calc(33% - 1rem) !important;
+                        width: calc(25% - 1rem) !important;
+                        flex: 1 1 calc(25% - 1rem) !important;
+                        min-width: calc(25% - 1rem) !important;
                     }
                     </style>""", unsafe_allow_html=True)
     hide_streamlit_style = """ <style>
