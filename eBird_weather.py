@@ -163,7 +163,6 @@ def main():
 
     state_col1, state_col2 = st.columns([1, 1.5])
     state_col1.radio("State", ["VA", "NY", "Other State"], horizontal=True, label_visibility="collapsed", key="radio_state")
-    st.markdown("#")
     if st.session_state.radio_state != "Other State":
         hotspot_data = load_eBird_hotspots(st.session_state.radio_state)
         time_zone = 'America/New_York'
@@ -179,7 +178,6 @@ def main():
     time_col1, time_col2 = st.columns([1, 1.5])
     time_col1.radio("Time", ["Current", "Other Time"], horizontal=True, label_visibility="collapsed",
               key="radio_time")
-    st.markdown("#")
     utc_offset = 24 - (datetime.now(zoneinfo.ZoneInfo(time_zone)).utcoffset().seconds/3600)
     # st.write(utc_offset)
     # st.write(datetime.now())
