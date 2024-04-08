@@ -156,6 +156,10 @@ def eBird_hotspot_dropdown(data, weather_time, utc_offset):
         get_info(weather_time.hour, lat_input, lon_input, utc_offset)
 
 
+
+
+
+
 def main():
     st.title("eBird Weather")
     st.markdown("#")
@@ -163,16 +167,18 @@ def main():
 
     state_col1, state_col2 = st.columns([1, 1.5])
     state_col1.radio("State", ["VA", "NY", "Other State"], horizontal=True, label_visibility="collapsed", key="radio_state")
+    time_zone = 'America/New_York'
     if st.session_state.radio_state != "Other State":
         hotspot_data = load_eBird_hotspots(st.session_state.radio_state)
         time_zone = 'America/New_York'
         # st.write(time_zone)
 
-    if st.session_state.radio_state == "Other State":
-        state_col2.selectbox("State:", state_dropdown_options(), index=None, label_visibility="collapsed", key="filter_state")
-        if st.session_state.filter_state:
+    else:
+        if state_col2.selectbox("State:", state_dropdown_options(), index=None, label_visibility="collapsed", key="filter_state"):
             hotspot_data = load_eBird_hotspots(st.session_state.filter_state)
             time_zone = us.states.lookup(st.session_state.filter_state).capital_tz
+        else:
+            st.stop()
             # st.write(time_zone)
 
     time_col1, time_col2 = st.columns([1, 1.5])
@@ -186,7 +192,9 @@ def main():
     # st.write(time.astimezone(tz.gettz(get_timezone(lat, lon))).strftime('%Y-%m-%d %H:%M:%S'))
     if st.session_state.radio_time == "Other Time":
         weather_time = time_col2.time_input('Input time', datetime.now(zoneinfo.ZoneInfo(time_zone)), label_visibility="collapsed", step=3600)
-
+    else:
+        time_col2.write(datetime.now(zoneinfo.ZoneInfo(time_zone)))
+    st.markdown("#")
     eBird_hotspot_dropdown(hotspot_data, weather_time, utc_offset)
 
 
