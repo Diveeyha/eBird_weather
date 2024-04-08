@@ -20,7 +20,7 @@ def get_timezone(lat, lng):
 
 # from streamlit.components.v1 import html
 #
-#
+#stre
 # # Define javascript
 # my_js = """
 # <!DOCTYPE html>
@@ -158,10 +158,12 @@ def eBird_hotspot_dropdown(data, weather_time, utc_offset):
 
 def main():
     st.title("eBird Weather")
+    st.markdown("#")
     weather_time = datetime.today()
 
     state_col1, state_col2 = st.columns([1, 1.5])
     state_col1.radio("State", ["VA", "NY", "Other State"], horizontal=True, label_visibility="collapsed", key="radio_state")
+    st.markdown("#")
     if st.session_state.radio_state != "Other State":
         hotspot_data = load_eBird_hotspots(st.session_state.radio_state)
         time_zone = 'America/New_York'
@@ -177,6 +179,7 @@ def main():
     time_col1, time_col2 = st.columns([1, 1.5])
     time_col1.radio("Time", ["Current", "Other Time"], horizontal=True, label_visibility="collapsed",
               key="radio_time")
+    st.markdown("#")
     utc_offset = 24 - (datetime.now(zoneinfo.ZoneInfo(time_zone)).utcoffset().seconds/3600)
     # st.write(utc_offset)
     # st.write(datetime.now())
@@ -188,11 +191,45 @@ def main():
 
     eBird_hotspot_dropdown(hotspot_data, weather_time, utc_offset)
 
-    # start = time.time()
-    # st.write('First! Time', int((time.time() - start) * 10) / 10.0, 'SECONDS')
-
 
 # Run main
 if __name__ == "__main__":
     st.set_page_config(page_icon='💨', initial_sidebar_state='expanded')
+    st.markdown("""<style>
+                    body {text-align: center}
+                    p {text-align: center} 
+                    button {float: center} 
+                    [data-testid=stVerticalBlock]{
+                        gap: 0rem
+                    }
+                    [data-testid=stHorizontalBlock]{
+                        gap: 0rem
+                    }
+                    [data-testid=stForm] [data-testid=stHorizontalBlock] 
+                    [data-testid=stHorizontalBlock] [data-testid=column]
+                    {
+                        width: calc(25% - 1rem) !important;
+                        flex: 1 1 calc(25% - 1rem) !important;
+                        min-width: calc(20% - 1rem) !important;
+                    }
+                    [data-testid=stSidebarUserContent] {
+                        margin-top: -75px;
+                    }
+                    .block-container {
+                        padding-top: 1.3rem;
+                        padding-bottom: 5rem;
+                    }
+                    hr:first-child {
+                        margin-top: -0.1px;
+                    }
+                    [data-testid="stMetricLabel"] {
+                        justify-content: center;
+                    }
+                    </style>""", unsafe_allow_html=True)
+    hide_streamlit_style = """ <style>
+                  MainMenu {visibility: hidden;}
+                  header {visibility: hidden;}
+                  footer {visibility: hidden;}
+                  </style>"""
+    st.markdown(hide_streamlit_style, unsafe_allow_html=True)
     main()
