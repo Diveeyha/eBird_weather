@@ -193,7 +193,7 @@ def main():
     if st.session_state.radio_time == "Other Time":
         weather_time = time_col2.time_input('Input time', datetime.now(zoneinfo.ZoneInfo(time_zone)), label_visibility="collapsed", step=3600)
     else:
-        time_col2.write(datetime.now(zoneinfo.ZoneInfo(time_zone)).strftime('%Y-%m-%d %H:%M'))
+        time_col2.write(datetime.now(zoneinfo.ZoneInfo(time_zone)).strftime('%m-%d %H:%M'))
     st.markdown("#")
     eBird_hotspot_dropdown(hotspot_data, weather_time, utc_offset)
 
