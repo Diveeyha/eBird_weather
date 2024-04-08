@@ -178,7 +178,7 @@ def main():
             # st.write(time_zone)
 
     time_col1, time_col2 = st.columns(2)
-    time_col1.radio("Time", [f"Current: {(datetime.now(zoneinfo.ZoneInfo(time_zone)).strftime('%m-%d-%y %H:%M'))}", "Other Time"], horizontal=True, label_visibility="collapsed",
+    time_col1.radio("Time", [f"Current: {(datetime.now(zoneinfo.ZoneInfo(time_zone)).strftime('%H:%M'))}", "Other Time"], horizontal=True, label_visibility="collapsed",
               key="radio_time")
     utc_offset = 24 - (datetime.now(zoneinfo.ZoneInfo(time_zone)).utcoffset().seconds/3600)
     # st.write(utc_offset)
