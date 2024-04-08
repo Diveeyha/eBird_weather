@@ -181,7 +181,7 @@ def main():
             st.stop()
             # st.write(time_zone)
 
-    time_col1, time_col2 = st.columns([1, 1.5])
+    time_col1, time_col2 = st.columns([1, 1])
     time_col1.radio("Time", ["Current", "Other Time"], horizontal=True, label_visibility="collapsed",
               key="radio_time")
     utc_offset = 24 - (datetime.now(zoneinfo.ZoneInfo(time_zone)).utcoffset().seconds/3600)
@@ -235,9 +235,7 @@ if __name__ == "__main__":
     hide_streamlit_style = """ <style>
                   MainMenu {visibility: hidden;}
                   header {visibility: hidden;}
-                  
+                  footer {visibility: hidden;}
                   </style>"""
     st.markdown(hide_streamlit_style, unsafe_allow_html=True)
     main()
-    #footer {visibility: hidden;}
-
